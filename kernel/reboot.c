@@ -28,14 +28,14 @@ struct pid *cad_pid;
 EXPORT_SYMBOL(cad_pid);
 
 #if defined(CONFIG_ARM)
-#define DEFAULT_REBOOT_MODE		= REBOOT_HARD
+#define DEFAULT_REBOOT_MODE = REBOOT_HARD
 #else
 #define DEFAULT_REBOOT_MODE
 #endif
+
 enum reboot_mode reboot_mode DEFAULT_REBOOT_MODE;
 EXPORT_SYMBOL_GPL(reboot_mode);
 enum reboot_mode panic_reboot_mode = REBOOT_UNDEFINED;
-
 /*
  * This variable is used privately to keep track of whether or not
  * reboot_type is still set to its default value (i.e., reboot= hasn't
@@ -80,7 +80,7 @@ void __weak (*pm_power_off)(void);
  *	trouble so this is our best effort to reboot.  This is
  *	safe to call in interrupt context.
  */
-void emergency_restart(void)
+void inline emergency_restart(void)
 {
 	kmsg_dump(KMSG_DUMP_EMERG);
 	system_state = SYSTEM_RESTART;
@@ -400,10 +400,8 @@ static void free_sys_off_handler(struct sys_off_handler *handler)
  *	an ERR_PTR()-encoded error code otherwise.
  */
 struct sys_off_handler *
-register_sys_off_handler(enum sys_off_mode mode,
-			 int priority,
-			 int (*callback)(struct sys_off_data *data),
-			 void *cb_data)
+register_sys_off_handler (enum sys_off_mode mode,int priority,int 
+		(*callback)(struct sys_off_data *data),void *cb_data)
 {
 	struct sys_off_handler *handler;
 	int err;
@@ -564,14 +562,14 @@ EXPORT_SYMBOL_GPL(devm_register_power_off_handler);
  *
  *	Returns zero on success, or error code on failure.
  */
-int devm_register_restart_handler(struct device *dev,
-				  int (*callback)(struct sys_off_data *data),
-				  void *cb_data)
+inline int devm_register_restart_handler(struct device *dev,
+	int (*callback)(struct sys_off_data *data),
+	void *cb_data)
 {
 	return devm_register_sys_off_handler(dev,
-					     SYS_OFF_MODE_RESTART,
-					     SYS_OFF_PRIO_DEFAULT,
-					     callback, cb_data);
+	SYS_OFF_MODE_RESTART,
+	SYS_OFF_PRIO_DEFAULT,
+	callback, cb_data);
 }
 EXPORT_SYMBOL_GPL(devm_register_restart_handler);
 
@@ -655,17 +653,15 @@ void do_kernel_power_off(void)
 {
 	struct sys_off_handler *sys_off = NULL;
 
-	/*
-	 * Register sys-off handlers for legacy PM callback. This allows
-	 * legacy PM callbacks temporary co-exist with the new sys-off API.
-	 *
-	 * TODO: Remove legacy handlers once all legacy PM users will be
-	 *       switched to the sys-off based APIs.
-	 */
-	if (pm_power_off)
+	if (pm_power_off) {
 		sys_off = register_sys_off_handler(SYS_OFF_MODE_POWER_OFF,
 						   SYS_OFF_PRIO_DEFAULT,
 						   legacy_pm_power_off, NULL);
+		if (IS_ERR(sys_off)) {
+			pr_err("Failed to register legacy PM power off handler\n");
+			return;
+		}
+	}
 
 	atomic_notifier_call_chain(&power_off_handler_list, 0, NULL);
 
@@ -1132,8 +1128,7 @@ static ssize_t mode_show(struct kobject *kobj, struct kobj_attribute *attr, char
 
 	return sprintf(buf, "%s\n", val);
 }
-static ssize_t mode_store(struct kobject *kobj, struct kobj_attribute *attr,
-			  const char *buf, size_t count)
+static ssize_t mode_store(struct kobject *kobj, struct kobj_attribute *attr,const char *buf, size_t count)
 {
 	if (!capable(CAP_SYS_BOOT))
 		return -EPERM;
@@ -1209,8 +1204,8 @@ static ssize_t type_show(struct kobject *kobj, struct kobj_attribute *attr, char
 
 	return sprintf(buf, "%s\n", val);
 }
-static ssize_t type_store(struct kobject *kobj, struct kobj_attribute *attr,
-			  const char *buf, size_t count)
+
+static ssize_t type_store(struct kobject *kobj, struct kobj_attribute *attr,const char *buf, size_t count)
 {
 	if (!capable(CAP_SYS_BOOT))
 		return -EPERM;
@@ -1242,8 +1237,8 @@ static ssize_t cpu_show(struct kobject *kobj, struct kobj_attribute *attr, char 
 {
 	return sprintf(buf, "%d\n", reboot_cpu);
 }
-static ssize_t cpu_store(struct kobject *kobj, struct kobj_attribute *attr,
-			  const char *buf, size_t count)
+
+static ssize_t cpu_store(struct kobject *kobj, struct kobj_attribute *attr,const char *buf, size_t count)
 {
 	unsigned int cpunum;
 	int rc;
@@ -1264,6 +1259,7 @@ static ssize_t cpu_store(struct kobject *kobj, struct kobj_attribute *attr,
 
 	return count;
 }
+
 static struct kobj_attribute reboot_cpu_attr = __ATTR_RW(cpu);
 #endif
 
