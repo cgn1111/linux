@@ -10376,8 +10376,7 @@ static void sched_mm_cid_remote_clear_old(struct mm_struct *mm, int cpu)
 	sched_mm_cid_remote_clear(mm, pcpu_cid, cpu);
 }
 
-static void sched_mm_cid_remote_clear_weight(struct mm_struct *mm, int cpu,
-					     int weight)
+static void sched_mm_cid_remote_clear_weight(struct mm_struct *mm, int cpu, int weight)
 {
 	struct mm_cid *pcpu_cid;
 	int cid;
@@ -10386,7 +10385,11 @@ static void sched_mm_cid_remote_clear_weight(struct mm_struct *mm, int cpu,
 	cid = READ_ONCE(pcpu_cid->cid);
 	if (!mm_cid_is_valid(cid) || cid < weight)
 		return;
-	sched_mm_cid_remote_clear(mm, pcpu_cid, cpu);
+
+	// Hata kontrolü eklenebilir
+	if (sched_mm_cid_remote_clear(mm, pcpu_cid, cpu) != 0) {
+		// Hata durumunda yapılacak işlemler
+	}
 }
 
 static void task_mm_cid_work(struct callback_head *work)
@@ -10399,12 +10402,14 @@ static void task_mm_cid_work(struct callback_head *work)
 
 	SCHED_WARN_ON(t != container_of(work, struct task_struct, cid_work));
 
-	work->next = work;	/* Prevent double-add */
+	work->next = work; // Prevent double-add
 	if (t->flags & PF_EXITING)
 		return;
+
 	mm = t->mm;
 	if (!mm)
 		return;
+
 	old_scan = READ_ONCE(mm->mm_cid_next_scan);
 	next_scan = now + msecs_to_jiffies(MM_CID_SCAN_DELAY);
 	if (!old_scan) {
@@ -10416,22 +10421,31 @@ static void task_mm_cid_work(struct callback_head *work)
 		else
 			old_scan = next_scan;
 	}
+
 	if (time_before(now, old_scan))
 		return;
+
 	if (!try_cmpxchg(&mm->mm_cid_next_scan, &old_scan, next_scan))
 		return;
+
 	cidmask = mm_cidmask(mm);
-	/* Clear cids that were not recently used. */
-	for_each_possible_cpu(cpu)
-		sched_mm_cid_remote_clear_old(mm, cpu);
+	// Clear cids that were not recently used.
+	for_each_possible_cpu(cpu) {
+		// Hata kontrolü ekleyebilirsin
+		if (sched_mm_cid_remote_clear_old(mm, cpu) != 0) {
+			// Hata durumunda yapılacak işlemler
+		}
+	}
+
 	weight = cpumask_weight(cidmask);
-	/*
-	 * Clear cids that are greater or equal to the cidmask weight to
-	 * recompact it.
-	 */
-	for_each_possible_cpu(cpu)
-		sched_mm_cid_remote_clear_weight(mm, cpu, weight);
+	// Clear cids that are greater or equal to the cidmask weight to recompact it.
+	for_each_possible_cpu(cpu) {
+		if (sched_mm_cid_remote_clear_weight(mm, cpu, weight) != 0) {
+			// Hata durumunda yapılacak işlemler
+		}
+	}
 }
+
 
 void init_sched_mm_cid(struct task_struct *t)
 {
