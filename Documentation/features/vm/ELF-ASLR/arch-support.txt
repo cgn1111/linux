@@ -1,31 +1,54 @@
-#
-# Feature name:          ELF-ASLR
-#         Kconfig:       ARCH_HAS_ELF_RANDOMIZE
-#         Kconfig:       ARCH_WANT_DEFAULT_TOPDOWN_MMAP_LAYOUT
-#         description:   arch randomizes the stack, heap and binary images of ELF binaries
-#
     -----------------------
-    |         arch |status|
+    |         arch | status |
     -----------------------
-    |       alpha: | TODO |
-    |         arc: | TODO |
-    |         arm: |  ok  |
-    |       arm64: |  ok  |
-    |        csky: |  ok  |
-    |     hexagon: | TODO |
-    |   loongarch: |  ok  |
-    |        m68k: | TODO |
-    |  microblaze: | TODO |
-    |        mips: |  ok  |
-    |       nios2: | TODO |
-    |    openrisc: | TODO |
-    |      parisc: |  ok  |
-    |     powerpc: |  ok  |
-    |       riscv: |  ok  |
-    |        s390: |  ok  |
-    |          sh: | TODO |
-    |       sparc: | TODO |
-    |          um: | TODO |
-    |         x86: |  ok  |
-    |      xtensa: | TODO |
+    |       alpha: | TODO   | 
+    |         arc: | TODO   | 
+    |         arm: |  ok    | 
+    |       arm64: |  ok    | 
+    |        csky: |  ok    | 
+    |     hexagon: | TODO   | 
+    |   loongarch: |  ok    | 
+    |        m68k: | TODO   | 
+    |  microblaze: | TODO   | 
+    |        mips: |  ok    | 
+    |       nios2: | TODO   | 
+    |    openrisc: | TODO   | 
+    |      parisc: |  ok    | 
+    |     powerpc: |  ok    | 
+    |       riscv: |  ok    | 
+    |        s390: |  ok    | 
+    |          sh: | TODO   | 
+    |       sparc: | TODO   | 
+    |          um: | TODO   | 
+    |         x86: |  ok    | 
+    |      xtensa: | TODO   | 
     -----------------------
+    
+    Steps for Adding ASLR Support for TODO Architectures:
+
+    1. **Implement ASLR:**
+       - Add ASLR functionality for architectures: `alpha`, `arc`, `hexagon`, `m68k`, `microblaze`, `nios2`, `openrisc`, `sh`, `sparc`, and `xtensa`.
+       - Write appropriate memory management functions and randomization algorithms for each architecture.
+
+    2. **Documentation Updates:**
+       - Create documentation explaining how ASLR works for each architecture, including configuration and example usage scenarios.
+
+    3. **Test Scenarios:**
+       - Develop test scenarios and automated testing tools to verify that ASLR is functioning correctly.
+       - Ensure the test scenarios validate that memory layouts are randomized as expected.
+
+    4. **Performance Optimizations:**
+       - Analyze the performance impacts of ASLR and add optimizations if necessary.
+       - Develop solutions to reduce the CPU load from randomization processes.
+
+    5. **Developer Tools:**
+       - Create tools to provide developers with information about ASLR.
+       - For example, develop a CLI tool or graphical application to display ASLR status.
+
+    6. **Security Improvements:**
+       - Investigate the security implications of ASLR and evaluate its integration with protection mechanisms.
+       - Identify potential security vulnerabilities and develop solutions.
+
+    7. **Feedback Mechanism:**
+       - Establish a mechanism for users and developers to provide feedback on ASLR.
+       - This feedback can provide valuable insights for enhancing the feature.
